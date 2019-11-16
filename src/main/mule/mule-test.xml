@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="47827bdb-2bd9-4a18-9a4f-38b037196067" basePath="/v1/history" >
+		<http:request-connection protocol="HTTPS" host="api.meteostat.net" />
+	</http:request-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ec6e5ed5-c22e-4f4e-b7f5-d95233019d0b" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="mule-testFlow" doc:id="ecbd1af0-6da7-49f0-87ee-d4dad7ec12e7" >
+		<http:listener doc:name="Listener" doc:id="6ad397c2-cecf-433a-8786-2f952fcf2952" path="/testing" config-ref="HTTP_Listener_config"/>
+		<logger level="INFO" doc:name="Logger" doc:id="9efa0e31-3e25-4e62-b6a4-86a53a5b6647" />
+		<http:request method="GET" doc:name="Request" doc:id="4125137e-e090-454c-b8c0-99df60aed910" config-ref="HTTP_Request_configuration" path="/daily">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"station" : "10637",
+	"start" : "2017-01-01",
+	"end" : "2017-12-31",
+	"key" : "uFwmrhOW"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="86d7b5c5-f517-4778-aa27-17cbe83a5ab7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ed961cd6-0fe9-44b2-9a59-0cd626883023" />
+	</flow>
+</mule>
